@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AFPSCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine.h"
 
 // Sets default values
@@ -38,7 +39,14 @@ void AAFPSCharacter::BeginPlay()
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Using leaves' FPS Character"));
 	}
-	
+	for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->GetName() == "topCamera") {
+			topCamera = *ActorItr;
+			break;
+		}
+
+	}
 }
 
 // Called every frame
@@ -67,7 +75,9 @@ void AAFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	// Bind pickup Action
 	PlayerInputComponent->BindAction("PickUp", IE_Pressed, this, &AAFPSCharacter::FPS_PickUp);
+	PlayerInputComponent->BindAction("ChangeView", IE_Pressed, this, &AAFPSCharacter::ChangeCameraView);
 }
+
 void AAFPSCharacter::FPS_MoveForwardAndBackward(float val){
 	if ((Controller != nullptr) && (val != 0.0f))
 	{
@@ -110,4 +120,13 @@ void AAFPSCharacter::FPS_PickUp() {
 
 void AAFPSCharacter::NotifyActorBeginOverlap(class AActor* otherActor) {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("hit!!!"));
+}
+void AAFPSCharacter::ChangeCameraView() {
+	APlayerController* playerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (playerController) {
+		if (playerController->GetViewTarget() == this)
+			playerController->SetViewTarget(topCamera);
+		else
+			playerController->SetViewTarget(this);
+	}
 }

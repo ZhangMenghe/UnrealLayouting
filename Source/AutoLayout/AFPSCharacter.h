@@ -42,10 +42,14 @@ public:
 		void FPS_StopJump();
 	UFUNCTION()
 		void FPS_PickUp();
-	
+	UFUNCTION()
+		void ChangeCameraView();
+	UPROPERTY(EditAnywhere)
+		AActor* topCamera;
 	// FPS Camera: use to adjust camera properties
 	UPROPERTY(VisibleAnywhere)
 		UCameraComponent* FPSCameraComponent;
+
 	// PFS-view mesh, visible only default
 	//USkeletalMeshComponent: an instance of an animated SkeletalMesh asset.
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
