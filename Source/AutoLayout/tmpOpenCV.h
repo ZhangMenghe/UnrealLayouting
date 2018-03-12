@@ -2,21 +2,20 @@
 
 #pragma once
 #include "opencv2/core/core.hpp"
-
+#include "opencv2/imgproc/imgproc.hpp"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "heightMapGenerator.generated.h"
+#include "tmpOpenCV.generated.h"
 
 UCLASS()
-class AUTOLAYOUT_API AheightMapGenerator : public AActor
+class AUTOLAYOUT_API AtmpOpenCV : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AheightMapGenerator();
-	std::string heightMap_filepath;
-	cv::Mat heightMap;
+	AtmpOpenCV();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
