@@ -12,7 +12,7 @@ AheightMapGenerator::AheightMapGenerator()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	FString dir = FPaths::GameContentDir() + FString("InputFiles/heightMapData.yml");
+	FString dir = FPaths::GameDir() + FString("InputData/intermediate/heightMapData.yml");
 	heightMap_filepath = string(TCHAR_TO_UTF8(*dir));
 	FileStorage fs;
 	fs.open(heightMap_filepath, FileStorage::READ);

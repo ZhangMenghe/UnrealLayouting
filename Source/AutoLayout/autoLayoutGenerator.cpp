@@ -2,7 +2,6 @@
 
 #include "autoLayoutGenerator.h"
 #include "processFixedObjects.h"
-//using namespace fixedOjects;
 
 // Sets default values
 AautoLayoutGenerator::AautoLayoutGenerator()
@@ -11,9 +10,9 @@ AautoLayoutGenerator::AautoLayoutGenerator()
 	PrimaryActorTick.bCanEverTick = false;
 	
 	inputObjFileName = new char[100];
-	int r = strcpy_s(inputObjFileName, 100, "E:/layoutParam.txt");
+	int r = strcpy_s(inputObjFileName, 100, DEFAULT_INPUT_PARAMETER_FILE);
 
-	roomSize = Size2f(800.f, 600.f);
+	roomSize = DEFAULT_ROOM_SIZE;
 	room = new Room(roomSize.width, roomSize.height);
 	
 }
