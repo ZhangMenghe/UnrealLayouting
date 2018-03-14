@@ -19,21 +19,23 @@ public:
 	AlayoutOnScreen();
 
 private:
-	const char* filename;
+	string filename;
 	vector<TCHAR*> BPaddr;
 	vector<TSubclassOf<class AActor>> BPSet;
-	
+	vector<vector<float>> recParams;
+	vector<vector<float>> objectParams;
+	vector<AActor *> objects;
+	int currentRecId;
+	void draw_single_stuff(int cate, vector<float>param, int objId);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void debug_getAllActors();
 	void debug_spawn();
 public:
-	vector<vector<float>> recParams;
-	vector<vector<float>> objects;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void draw_single_stuff(int cate, vector<float>param, int objId);
+	
 	void parser_resfile();
-
+	void change_recommendation();
 };

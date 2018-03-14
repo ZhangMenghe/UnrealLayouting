@@ -49,6 +49,15 @@ void AAFPSCharacter::BeginPlay()
 		layoutScreen = *ActorItr;
 		break;
 	}
+
+	UWorld * const World = GetWorld();
+	if (World) {
+		//frotator: y z, x
+		cameraPointActor = World->SpawnActor<AActor>(cameraPointBP, FPSMesh->GetSocketLocation("FPSMesh"), FRotator(.0f, .0f, .0f));
+		cameraPointActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepWorldTransform);
+		cameraPointActor->SetActorHiddenInGame(true);
+	}
+	
 	layoutScreen->parser_resfile();
 	//AActor * tmpActor = GetWorld()->SpawnActor<AlayoutOnScreen>(layoutScreenBP, { .0f,.0f,.0f }, { .0f,.0f,.0f });
 }
@@ -80,6 +89,7 @@ void AAFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	// Bind pickup Action
 	PlayerInputComponent->BindAction("PickUp", IE_Pressed, this, &AAFPSCharacter::FPS_PickUp);
 	PlayerInputComponent->BindAction("ChangeView", IE_Pressed, this, &AAFPSCharacter::ChangeCameraView);
+	PlayerInputComponent->BindAction("NextRecommendation", IE_Pressed, this, &AAFPSCharacter::ChangeToNextRecommendation);
 }
 
 void AAFPSCharacter::FPS_MoveForwardAndBackward(float val){
@@ -129,18 +139,17 @@ void AAFPSCharacter::ChangeCameraView() {
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(this, 0);
 	if (playerController) {
 		if (playerController->GetViewTarget() == this) {
-
 			playerController->SetViewTarget(topCamera);
-
-			UWorld * const World = GetWorld();
-			if (World) {
-				//frotator: y z, x
-				AActor * spawnActor = World->SpawnActor<AActor>(cameraPointBP, FPSMesh->GetSocketLocation("FPSMesh"), FRotator(.0f,.0f,.0f));
-				spawnActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepWorldTransform);
-			}
+			cameraPointActor->SetActorHiddenInGame(false);
 		}
 			
-		else
+		else {
 			playerController->SetViewTarget(this);
+			cameraPointActor->SetActorHiddenInGame(true);
+		}
+			
 	}
+}
+void AAFPSCharacter::ChangeToNextRecommendation() {
+	layoutScreen->change_recommendation();
 }

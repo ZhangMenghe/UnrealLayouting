@@ -11,13 +11,14 @@ float dist_of_points(float x1, float y1, float x2, float y2) {
 // Sets default values
 AlayoutOnScreen::AlayoutOnScreen()
 {
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("create layout called from fps"));
-	}
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;	
-	filename = "E:/recommendation.txt";
-	
+	PrimaryActorTick.bCanEverTick = false;
+	FString dir = FPaths::GameDir() + FString("InputData/intermediate/recommendation.txt");
+	filename = string(TCHAR_TO_UTF8(*dir));
+
+	//filename = "E:/recommendation.txt";
+	currentRecId = -1;
+
 	static ConstructorHelpers::FClassFinder<AActor> wallBP(TEXT("/Game/Blueprints/wallBP"));
 	BPSet.push_back((UClass *)wallBP.Class);
 
@@ -29,7 +30,7 @@ AlayoutOnScreen::AlayoutOnScreen()
 
 	static ConstructorHelpers::FClassFinder<AActor> obsBP(TEXT("/Game/Blueprints/obstacleBP"));
 	BPSet.push_back((UClass *)obsBP.Class);
-	//parser_resfile();
+
 }
 
 // Called when the game starts or when spawned
@@ -66,7 +67,7 @@ void AlayoutOnScreen::debug_spawn() {
 		}
 	}
 }
-void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int objId = 0) {
+void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId = -1) {
 	float cx=0, cy=0, cz=0;
 	float sx = 10, sy = 10, sz = 30;
 	float rot = 0;
@@ -80,9 +81,13 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int objId 
 		sz = 100;
 		break;
 	case 1:
-		sx = objects[objId][3]; sy = objects[objId][4]; sz = objects[objId][2];
+		sx = objectParams[ObjId][3]; sy = objectParams[ObjId][4]; sz = objectParams[ObjId][2];
 		cx = param[1]; cy = param[2];
 		rot = param[3];
+		if (objects.size() > ObjId) {
+			objects[ObjId]->SetActorLocationAndRotation(FVector(cx*10, cy*10, sz*50), FRotator(.0f, rot, .0f).Quaternion());
+			return;
+		}
 		break;
 	case 2:
 		cx = param[1];
@@ -102,6 +107,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int objId 
 	sx /= 10; sy /= 10; sz /= 10;
 	cx *= 10; cy *= 10; cz = sz * 50;
 
+
 	UWorld * const World = GetWorld();
 	if (World) {
 		//frotator: y z, x
@@ -113,6 +119,8 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int objId 
 			if (sc)
 				sc->SetWorldScale3D(FVector(sx, sy, sz));
 		}
+		if (cate == 1)
+			objects.push_back(spawnActor);
 	}
 }
 void AlayoutOnScreen::parser_resfile() {
@@ -156,7 +164,7 @@ void AlayoutOnScreen::parser_resfile() {
 			if (state == 1)
 				recParams.push_back(param);
 			else if (state == 4)
-				objects.push_back(param);
+				objectParams.push_back(param);
 			else
 				draw_single_stuff(state, param);
 			break;
@@ -164,5 +172,12 @@ void AlayoutOnScreen::parser_resfile() {
 	}
 	instream.close();
 	// test to draw single recommendation
-	draw_single_stuff(1, recParams[2], 0);
+	//draw_single_stuff(1, recParams[2], 0);
+}
+void AlayoutOnScreen::change_recommendation() {
+	currentRecId = (currentRecId + 1) % 3;
+	for (int i = 0; i < objectParams.size(); i++) {
+		draw_single_stuff(1, recParams[3 * i + currentRecId], i);
+	}
+		
 }

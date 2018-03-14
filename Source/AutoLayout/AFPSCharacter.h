@@ -21,7 +21,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	TSubclassOf<class AActor> cameraPointBP;
-
+	AActor * cameraPointActor;
 	
 public:	
 	// Called every frame
@@ -47,6 +47,8 @@ public:
 		void FPS_PickUp();
 	UFUNCTION()
 		void ChangeCameraView();
+	UFUNCTION()
+		void ChangeToNextRecommendation();
 	UPROPERTY(EditAnywhere)
 		AActor* topCamera;
 	// FPS Camera: use to adjust camera properties
