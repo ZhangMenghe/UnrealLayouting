@@ -11,7 +11,9 @@ float dist_of_points(float x1, float y1, float x2, float y2) {
 // Sets default values
 AlayoutOnScreen::AlayoutOnScreen()
 {
-	
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("create layout called from fps"));
+	}
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;	
 	filename = "E:/recommendation.txt";
@@ -27,13 +29,13 @@ AlayoutOnScreen::AlayoutOnScreen()
 
 	static ConstructorHelpers::FClassFinder<AActor> obsBP(TEXT("/Game/Blueprints/obstacleBP"));
 	BPSet.push_back((UClass *)obsBP.Class);
+	//parser_resfile();
 }
 
 // Called when the game starts or when spawned
 void AlayoutOnScreen::BeginPlay()
 {
 	Super::BeginPlay();
-	parser_resfile();
 }
 
 // Called every frame

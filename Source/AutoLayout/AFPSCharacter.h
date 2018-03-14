@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "layoutOnScreen.h"
 
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
@@ -19,7 +20,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	TSubclassOf<class AActor> cameraPointBP;
 
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -57,4 +60,7 @@ public:
 		UStaticMeshComponent * FPSMesh;
 	UPROPERTY()
 		UPrimitiveComponent* colliderTrigger;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AlayoutOnScreen> layoutScreenClass;
+	AlayoutOnScreen* layoutScreen;
 };

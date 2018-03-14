@@ -26,10 +26,10 @@ AAFPSCharacter::AAFPSCharacter()
 	FPSMesh->SetupAttachment(FPSCameraComponent);
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
+	//TopCamMesh->SetStaticMesh()
+	static ConstructorHelpers::FClassFinder<AActor> pointBP(TEXT("/Game/Blueprints/thirdPersonBP"));
+	cameraPointBP = (UClass *)pointBP.Class;
 
-	//colliderTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("TriggerCollider"));
-	//colliderTrigger->bGenerateOverlapEvents = true;
-	//colliderTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 // Called when the game starts or when spawned
@@ -41,12 +41,16 @@ void AAFPSCharacter::BeginPlay()
 	}
 	for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		if (ActorItr->GetName() == "topCamera") {
-			topCamera = *ActorItr;
-			break;
-		}
-
+		topCamera = *ActorItr;
+		break;
 	}
+	for (TActorIterator<AlayoutOnScreen> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		layoutScreen = *ActorItr;
+		break;
+	}
+	layoutScreen->parser_resfile();
+	//AActor * tmpActor = GetWorld()->SpawnActor<AlayoutOnScreen>(layoutScreenBP, { .0f,.0f,.0f }, { .0f,.0f,.0f });
 }
 
 // Called every frame
@@ -124,8 +128,18 @@ void AAFPSCharacter::NotifyActorBeginOverlap(class AActor* otherActor) {
 void AAFPSCharacter::ChangeCameraView() {
 	APlayerController* playerController = UGameplayStatics::GetPlayerController(this, 0);
 	if (playerController) {
-		if (playerController->GetViewTarget() == this)
+		if (playerController->GetViewTarget() == this) {
+
 			playerController->SetViewTarget(topCamera);
+
+			UWorld * const World = GetWorld();
+			if (World) {
+				//frotator: y z, x
+				AActor * spawnActor = World->SpawnActor<AActor>(cameraPointBP, FPSMesh->GetSocketLocation("FPSMesh"), FRotator(.0f,.0f,.0f));
+				spawnActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepWorldTransform);
+			}
+		}
+			
 		else
 			playerController->SetViewTarget(this);
 	}
