@@ -3,38 +3,37 @@
 #include "layoutOnScreen.h"
 #include "EngineUtils.h"
 #include "Engine.h"
+
+float dist_of_points(float x1, float y1, float x2, float y2) {
+	return sqrtf(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+}
+
 // Sets default values
 AlayoutOnScreen::AlayoutOnScreen()
 {
+	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;	
-	filename = "/Game/InputData/intermediate/recommendation.txt";
-	BPaddr.push_back(TEXT("/Game/Blueprints/wallBP"));
-	BPaddr.push_back(TEXT("/Game/Blueprints/objBP"));
-	BPaddr.push_back(TEXT("/Game/Blueprints/obstacleBP"));
-	BPaddr.push_back(TEXT("/Game/Blueprints/focalBP"));
-	for (int i = 0; i < 4; i++) {
-		static ConstructorHelpers::FClassFinder<AActor> findBP(BPaddr[i]);
-		if (findBP.Class) {
-			TSubclassOf<class AActor> tmpBP = (UClass *)findBP.Class;
-			BPSet.push_back(tmpBP);
-		}
-	}
-	/*static ConstructorHelpers::FClassFinder<AActor> findBP(TEXT("/Game/Blueprints/pikachu"));
-	if (findBP.Class) {
-		TSubclassOf<class AActor> tmpBP = (UClass *)findBP.Class;
-		BPSet.push_back(tmpBP);
-	}*/
+	filename = "E:/recommendation.txt";
+	
+	static ConstructorHelpers::FClassFinder<AActor> wallBP(TEXT("/Game/Blueprints/wallBP"));
+	BPSet.push_back((UClass *)wallBP.Class);
 
+	static ConstructorHelpers::FClassFinder<AActor> objBP(TEXT("/Game/Blueprints/objBP"));
+	BPSet.push_back((UClass *)objBP.Class);
+
+	static ConstructorHelpers::FClassFinder<AActor> focalBP(TEXT("/Game/Blueprints/focalBP"));
+	BPSet.push_back((UClass *)focalBP.Class);
+
+	static ConstructorHelpers::FClassFinder<AActor> obsBP(TEXT("/Game/Blueprints/obstacleBP"));
+	BPSet.push_back((UClass *)obsBP.Class);
 }
 
 // Called when the game starts or when spawned
 void AlayoutOnScreen::BeginPlay()
 {
 	Super::BeginPlay();
-
-
-	debug_spawn();
+	parser_resfile();
 }
 
 // Called every frame
@@ -65,19 +64,55 @@ void AlayoutOnScreen::debug_spawn() {
 		}
 	}
 }
-void AlayoutOnScreen::draw_wall(vector<float> params) {
+void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int objId = 0) {
+	float cx=0, cy=0, cz=0;
+	float sx = 10, sy = 10, sz = 30;
+	float rot = 0;
+	switch (cate)
+	{
+	case 0:
+		cx = (param[2] + param[4]) / 2;
+		cy = (param[3] + param[5]) / 2;
+		rot = param[6];
+		sx = dist_of_points(param[2], param[3], param[4], param[5]);
+		sz = 100;
+		break;
+	case 1:
+		sx = objects[objId][3]; sy = objects[objId][4]; sz = objects[objId][2];
+		cx = param[1]; cy = param[2];
+		rot = param[3];
+		break;
+	case 2:
+		cx = param[1];
+		cy = param[2];
+		sx = sy = sz = 50;
+		break;
+	case 3:
+		cx = (param[0] + param[4]) / 2;
+		cy = (param[1] + param[5]) / 2;
+		rot = atanf((param[7] - param[3]) / (param[6] - param[2])) * 180 / 3.14;
+		sx = dist_of_points(param[0], param[1], param[2], param[3]);
+		sy = dist_of_points(param[2], param[3], param[4], param[5]);
+		break;
+	default:
+		break;
+	}
+	sx /= 10; sy /= 10; sz /= 10;
+	cx *= 10; cy *= 10; cz = sz * 50;
 
+	UWorld * const World = GetWorld();
+	if (World) {
+		//frotator: y z, x
+		AActor * spawnActor = World->SpawnActor<AActor>(BPSet[cate], FVector(cx, cy, cz), FRotator(.0f, rot, .0f));
+		TArray<UActorComponent *> components;
+		spawnActor->GetComponents(components);
+		for (int32 i = 0; i < components.Num(); ++i) {
+			USceneComponent* sc = Cast<USceneComponent>(components[i]);
+			if (sc)
+				sc->SetWorldScale3D(FVector(sx, sy, sz));
+		}
+	}
 }
-void AlayoutOnScreen::darw_focal_point(vector<float> params) {
-
-}
-void AlayoutOnScreen::draw_obstacle(vector<float> params) {
-
-}
-void AlayoutOnScreen::draw_recommendaton(vector<float> params, vector<float> objInfo) {
-
-}
-
 void AlayoutOnScreen::parser_resfile() {
 	ifstream instream(filename);
 	string str;
@@ -86,6 +121,7 @@ void AlayoutOnScreen::parser_resfile() {
 	char* context = nullptr;
 	int state = -1;
 	vector<float> currentObj;
+	
 	while (instream && getline(instream, str)) {
 		if (!str.length())
 			continue;
@@ -99,7 +135,7 @@ void AlayoutOnScreen::parser_resfile() {
 			state = 0;
 			break;
 		case 'F'://furniture
-			state = 1;
+			state = 4;
 			break;
 		case 'P'://focal point
 			state = 2;
@@ -107,36 +143,24 @@ void AlayoutOnScreen::parser_resfile() {
 		case 'O'://obstacle
 			state = 3;
 			break;
-		case 'R'://Recommendation for an object
-			state = 4;
-			break;
+		case 'R'://furniture pos recommendation
+			state = 1;
+			
 		default:
 			while (token != nullptr) {
 				param.push_back(atof(token));
 				token = strtok_s(nullptr, delims, &context);
 			}
-			switch (state)
-			{
-			case 0:
-				draw_wall(param);
-				break;
-			case 1:
-				currentObj = param;
-				break;
-			case 2:
-				darw_focal_point(param);
-				break;
-			case 3:
-				draw_obstacle(param);
-				break;
-			case 4:
-				draw_recommendaton(param, currentObj);
-				break;
-			default:
-				break;
-			}
+			if (state == 1)
+				recParams.push_back(param);
+			else if (state == 4)
+				objects.push_back(param);
+			else
+				draw_single_stuff(state, param);
 			break;
 		}
 	}
 	instream.close();
+	// test to draw single recommendation
+	draw_single_stuff(1, recParams[2], 0);
 }
