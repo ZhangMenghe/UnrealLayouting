@@ -3,7 +3,7 @@
 #include "layoutOnScreen.h"
 #include "EngineUtils.h"
 #include "Engine.h"
-
+#include "Components/StaticMeshComponent.h"
 float dist_of_points(float x1, float y1, float x2, float y2) {
 	return sqrtf(pow((x2 - x1), 2) + pow((y2 - y1), 2));
 }
@@ -31,6 +31,13 @@ AlayoutOnScreen::AlayoutOnScreen()
 	static ConstructorHelpers::FClassFinder<AActor> obsBP(TEXT("/Game/Blueprints/obstacleBP"));
 	BPSet.push_back((UClass *)obsBP.Class);
 
+	char* names[9] = { "Material'/Game/Material/chair.chair'" ,"Material'/Game/Material/coffetable.coffetable'" ,"Material'/Game/Material/sofa.sofa'" 
+		"Material'/Game/Material/endtable.endtable'" ,"Material'/Game/Material/bed.bed'" ,"Material'/Game/Material/nightstand.nightstand'" ,
+		"Material'/Game/Material/shelf.shelf'" ,"Material'/Game/Material/table.table'" ,"Material'/Game/Material/others.others'" };
+	for (int i = 0; i < 9; i++) {
+		static ConstructorHelpers::FObjectFinder<UMaterial> Material(*FString(names[i]));
+		materialToGetSet.push_back(Cast<UMaterialInterface>(Material.Object));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -85,7 +92,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 		cx = param[1]; cy = param[2];
 		rot = param[3];
 		if (objects.size() > ObjId) {
-			objects[ObjId]->SetActorLocationAndRotation(FVector(cx*10, cy*10, sz*50), FRotator(.0f, rot, .0f).Quaternion());
+			objects[ObjId]->SetActorLocationAndRotation(FVector(cx*10, cy*10, sz*5), FRotator(.0f, rot / PI * 180, .0f).Quaternion());
 			return;
 		}
 		break;
@@ -106,7 +113,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 	}
 	sx /= 10; sy /= 10; sz /= 10;
 	cx *= 10; cy *= 10; cz = sz * 50;
-
+	rot = rot / PI * 180;
 
 	UWorld * const World = GetWorld();
 	if (World) {
@@ -116,11 +123,24 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 		spawnActor->GetComponents(components);
 		for (int32 i = 0; i < components.Num(); ++i) {
 			USceneComponent* sc = Cast<USceneComponent>(components[i]);
-			if (sc)
-				sc->SetWorldScale3D(FVector(sx, sy, sz));
+			sc->SetWorldScale3D(FVector(sx, sy, sz));
 		}
-		if (cate == 1)
+		if (cate == 1) {
+			UMaterialInstanceDynamic*DynamicMaterialToUse = UMaterialInstanceDynamic::Create(materialToGetSet[int(objectParams[ObjId][1])], 0);
+			//DynamicMaterialToUse->SetVectorParameterValue(FName("Color"), FLinearColor::Red);
+			//DynamicMaterialToUse->SetVectorParameterValue(FName("Emissive Color"),FLinearColor(1.0f, 0.0f, 0.0f));
+			TArray<UStaticMeshComponent*> Components;
+			spawnActor->GetComponents<UStaticMeshComponent>(Components);
+			for (int32 i = 0; i<Components.Num(); i++)
+			{
+				UStaticMeshComponent* StaticMeshComponent = Components[i];
+				StaticMeshComponent->SetMaterial(0, DynamicMaterialToUse);
+			}
+
 			objects.push_back(spawnActor);
+		}
+			
+			
 	}
 }
 void AlayoutOnScreen::parser_resfile() {

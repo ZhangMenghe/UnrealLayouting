@@ -54,10 +54,9 @@ void AAFPSCharacter::BeginPlay()
 	if (World) {
 		//frotator: y z, x
 		cameraPointActor = World->SpawnActor<AActor>(cameraPointBP, FPSMesh->GetSocketLocation("FPSMesh"), FRotator(.0f, .0f, .0f));
-		cameraPointActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepWorldTransform);
+		cameraPointActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		cameraPointActor->SetActorHiddenInGame(true);
 	}
-	
 	layoutScreen->parser_resfile();
 	//AActor * tmpActor = GetWorld()->SpawnActor<AlayoutOnScreen>(layoutScreenBP, { .0f,.0f,.0f }, { .0f,.0f,.0f });
 }
@@ -93,6 +92,7 @@ void AAFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 }
 
 void AAFPSCharacter::FPS_MoveForwardAndBackward(float val){
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("MOVE!!!!!!"));
 	if ((Controller != nullptr) && (val != 0.0f))
 	{
 		// find out which way is forward

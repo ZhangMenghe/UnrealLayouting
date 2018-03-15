@@ -25,6 +25,8 @@ private:
 	vector<vector<float>> recParams;
 	vector<vector<float>> objectParams;
 	vector<AActor *> objects;
+	vector<UMaterialInterface*> materialToGetSet;
+	//vector<FLinearColor> labelColorSet;
 	int currentRecId;
 	void draw_single_stuff(int cate, vector<float>param, int objId);
 protected:

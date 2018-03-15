@@ -68,20 +68,23 @@ void AautoLayoutGenerator::parser_inputfile() {
 	for (int i = 0; i < itemNum; i++) {
 		switch (cateType[i])
 		{
+			//comments
 		case '#':
 			break;
 			//add a new wall
 		case 'w':
 			room->add_a_wall(Vec3f(parameters[i][0], parameters[i][1], parameters[i][2]), parameters[i][3], parameters[i][4], parameters[i][5]);
 			break;
+			//furniture
 		case 'f':
-			//groupid = parameters[i].size() == 8 ? 0 : parameters[i][8];
 			room->add_an_object(parameters[i], 0);
 			break;
+			//focal point
 		case 'p':
 			groupid = parameters[i].size() == 3 ? 0 : parameters[i][3];
 			room->add_a_focal_point(Vec3f(parameters[i][0], parameters[i][1], parameters[i][2]), groupid);
 			break;
+			// fixed objects
 		case 'o':
 			fixedObjParams.push_back(parameters[i]);
 			break;
