@@ -17,16 +17,21 @@ class labelHelper(object):
         # refined results with labels from NN result
         self.boundingBoxes = None
         self.boxesFromDepth = None
-        self.rotatedBox = []
-        self.rotatedRect = []
+        self.rotatedBox = None
+        self.rotatedRect = None
         self.heightMapMsk = None
-        self.boxLabel = []
-        self.mergedLables = []
-        self.mergeIdx = []
+        self.boxLabel = None
+        self.mergedLables = None
+        self.mergeIdx = None
         self.imageWithBox = None
         # self.getObstacleLabels()
 
     def fit(self, depthHelper,labelName=None, labelFile=None):
+        self.boxLabel = []
+        self.mergeIdx = []
+        self.rotatedBox = []
+        self.rotatedRect = []
+        self.mergedLables = []
         self.imgBounds = depthHelper.imgbounds
         self.contours = depthHelper.contours
         self.contourHeights = depthHelper.contourHeights
@@ -145,7 +150,8 @@ class labelHelper(object):
         mergedBoxes = []
         mergedLables = []
         if(numOfLabel == numOfBox):
-            return boundingboxes
+            self.boundingBoxes = boundingboxes
+            return
         for label in np.unique(self.boxLabel):
             index = np.where(self.boxLabel==label)
             if(len(index[0]) == 1):

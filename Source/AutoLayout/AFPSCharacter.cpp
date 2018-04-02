@@ -27,8 +27,8 @@ AAFPSCharacter::AAFPSCharacter()
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
 	//TopCamMesh->SetStaticMesh()
-	static ConstructorHelpers::FClassFinder<AActor> pointBP(TEXT("/Game/Blueprints/thirdPersonBP"));
-	cameraPointBP = (UClass *)pointBP.Class;
+	//static ConstructorHelpers::FClassFinder<AActor> pointBP(TEXT("/Game/Blueprints/thirdPersonBP"));
+	//cameraPointBP = (UClass *)pointBP.Class;
 
 }
 
@@ -50,13 +50,13 @@ void AAFPSCharacter::BeginPlay()
 		break;
 	}
 
-	UWorld * const World = GetWorld();
+	/*UWorld * const World = GetWorld();
 	if (World) {
 		//frotator: y z, x
-		cameraPointActor = World->SpawnActor<AActor>(cameraPointBP, FPSMesh->GetSocketLocation("FPSMesh"), FRotator(.0f, .0f, .0f));
+		cameraPointActor = World->SpawnActor<AActor>(cameraPointBP, GetMesh()->GetSocketLocation("Mesh"), FRotator(.0f, .0f, .0f));
 		cameraPointActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		cameraPointActor->SetActorHiddenInGame(true);
-	}
+	}*/
 	layoutScreen->parser_resfile();
 	//AActor * tmpActor = GetWorld()->SpawnActor<AlayoutOnScreen>(layoutScreenBP, { .0f,.0f,.0f }, { .0f,.0f,.0f });
 }
@@ -140,12 +140,12 @@ void AAFPSCharacter::ChangeCameraView() {
 	if (playerController) {
 		if (playerController->GetViewTarget() == this) {
 			playerController->SetViewTarget(topCamera);
-			cameraPointActor->SetActorHiddenInGame(false);
+			//cameraPointActor->SetActorHiddenInGame(false);
 		}
 			
 		else {
 			playerController->SetViewTarget(this);
-			cameraPointActor->SetActorHiddenInGame(true);
+			//cameraPointActor->SetActorHiddenInGame(true);
 		}
 			
 	}

@@ -8,13 +8,13 @@ AautoLayoutGenerator::AautoLayoutGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	
+
 	inputObjFileName = new char[100];
 	int r = strcpy_s(inputObjFileName, 100, DEFAULT_INPUT_PARAMETER_FILE);
 
 	roomSize = DEFAULT_ROOM_SIZE;
 	room = new Room(roomSize.width, roomSize.height);
-	
+
 }
 
 // Called when the game starts or when spawned
@@ -110,6 +110,11 @@ void AautoLayoutGenerator::parser_inputfile() {
 		//uncomment this to make those merged object as free objects
 		sort(groupedIds.begin(), groupedIds.end());
 		for (int compareIdx = fixedObjParams.size() - 1, gidx = groupedIds.size() - 1; compareIdx > -1; ) {
+			if (gidx < 0) {
+							for(; compareIdx > -1;compareIdx--)
+								room->add_an_object(fixedObjParams[compareIdx]);
+							break;
+						}
 			if (compareIdx > groupedIds[gidx]) {
 				//vector<Point2f> rect1;
 				//for (int i = 0; i < 4; i++)

@@ -31,11 +31,12 @@ AlayoutOnScreen::AlayoutOnScreen()
 	static ConstructorHelpers::FClassFinder<AActor> obsBP(TEXT("/Game/Blueprints/obstacleBP"));
 	BPSet.push_back((UClass *)obsBP.Class);
 
-	char* names[9] = { "Material'/Game/Material/chair.chair'" ,"Material'/Game/Material/coffetable.coffetable'" ,"Material'/Game/Material/sofa.sofa'" 
+	char* names[9] = { "Material'/Game/Material/chair.chair'" ,"Material'/Game/Material/coffetable.coffetable'" ,"Material'/Game/Material/sofa.sofa'",
 		"Material'/Game/Material/endtable.endtable'" ,"Material'/Game/Material/bed.bed'" ,"Material'/Game/Material/nightstand.nightstand'" ,
 		"Material'/Game/Material/shelf.shelf'" ,"Material'/Game/Material/table.table'" ,"Material'/Game/Material/others.others'" };
-	for (int i = 0; i < 9; i++) {
-		static ConstructorHelpers::FObjectFinder<UMaterial> Material(*FString(names[i]));
+	for (int32 i = 0; i < 9; ++i) {
+		FString tmp = FString(names[i]);
+		ConstructorHelpers::FObjectFinder<UMaterial> Material(*tmp);
 		materialToGetSet.push_back(Cast<UMaterialInterface>(Material.Object));
 	}
 }
@@ -74,6 +75,7 @@ void AlayoutOnScreen::debug_spawn() {
 		}
 	}
 }
+
 void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId = -1) {
 	float cx=0, cy=0, cz=0;
 	float sx = 10, sy = 10, sz = 30;
@@ -86,15 +88,6 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 		rot = param[6];
 		sx = dist_of_points(param[2], param[3], param[4], param[5]);
 		sz = 100;
-		break;
-	case 1:
-		sx = objectParams[ObjId][3]; sy = objectParams[ObjId][4]; sz = objectParams[ObjId][2];
-		cx = param[1]; cy = param[2];
-		rot = param[3];
-		if (objects.size() > ObjId) {
-			objects[ObjId]->SetActorLocationAndRotation(FVector(cx*10, cy*10, sz*5), FRotator(.0f, rot / PI * 180, .0f).Quaternion());
-			return;
-		}
 		break;
 	case 2:
 		cx = param[1];
@@ -124,22 +117,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 		for (int32 i = 0; i < components.Num(); ++i) {
 			USceneComponent* sc = Cast<USceneComponent>(components[i]);
 			sc->SetWorldScale3D(FVector(sx, sy, sz));
-		}
-		if (cate == 1) {
-			UMaterialInstanceDynamic*DynamicMaterialToUse = UMaterialInstanceDynamic::Create(materialToGetSet[int(objectParams[ObjId][1])], 0);
-			//DynamicMaterialToUse->SetVectorParameterValue(FName("Color"), FLinearColor::Red);
-			//DynamicMaterialToUse->SetVectorParameterValue(FName("Emissive Color"),FLinearColor(1.0f, 0.0f, 0.0f));
-			TArray<UStaticMeshComponent*> Components;
-			spawnActor->GetComponents<UStaticMeshComponent>(Components);
-			for (int32 i = 0; i<Components.Num(); i++)
-			{
-				UStaticMeshComponent* StaticMeshComponent = Components[i];
-				StaticMeshComponent->SetMaterial(0, DynamicMaterialToUse);
-			}
-
-			objects.push_back(spawnActor);
-		}
-			
+		}	
 			
 	}
 }
@@ -194,10 +172,45 @@ void AlayoutOnScreen::parser_resfile() {
 	// test to draw single recommendation
 	//draw_single_stuff(1, recParams[2], 0);
 }
+
 void AlayoutOnScreen::change_recommendation() {
 	currentRecId = (currentRecId + 1) % 3;
 	for (int i = 0; i < objectParams.size(); i++) {
-		draw_single_stuff(1, recParams[3 * i + currentRecId], i);
+		vector<float> param = recParams[3 * i + currentRecId];
+		float sx = objectParams[i][3]/10; float sy = objectParams[i][4]/10; float sz = objectParams[i][2]/10;
+		float cx = param[1] * 10; float cy = param[2] * 10; float cz = sz * 50;
+		float rot = param[3] / PI * 180;;
+		if (objects.size() > i) {
+			objects[i]->SetActorLocationAndRotation(FVector(cx, cy, cz), FRotator(.0f, rot, .0f).Quaternion());
+			return;
+		}
+
+		UWorld * const World = GetWorld();
+
+		if (World) {
+			//frotator: y z, x
+			AActor * spawnActor = World->SpawnActor<AActor>(BPSet[1], FVector(cx, cy, cz), FRotator(.0f, rot, .0f));
+			TArray<UActorComponent *> components;
+			spawnActor->GetComponents(components);
+			for (int32 i = 0; i < components.Num(); ++i) {
+				USceneComponent* sc = Cast<USceneComponent>(components[i]);
+				sc->SetWorldScale3D(FVector(sx, sy, sz));
+			}
+
+			UMaterialInstanceDynamic*DynamicMaterialToUse = UMaterialInstanceDynamic::Create(materialToGetSet[int(objectParams[i][1])], 0);
+			//DynamicMaterialToUse->SetVectorParameterValue(FName("Color"), FLinearColor::Red);
+			//DynamicMaterialToUse->SetVectorParameterValue(FName("Emissive Color"),FLinearColor(1.0f, 0.0f, 0.0f));
+			TArray<UStaticMeshComponent*> Components;
+			spawnActor->GetComponents<UStaticMeshComponent>(Components);
+			for (int32 i = 0; i<Components.Num(); i++)
+			{
+				UStaticMeshComponent* StaticMeshComponent = Components[i];
+				StaticMeshComponent->SetMaterial(0, DynamicMaterialToUse);
+			}
+
+			objects.push_back(spawnActor);
+			}
+
 	}
 		
 }

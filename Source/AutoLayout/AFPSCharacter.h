@@ -20,8 +20,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	TSubclassOf<class AActor> cameraPointBP;
-	AActor * cameraPointActor;
+	//TSubclassOf<class AActor> cameraPointBP;
+	//AActor * cameraPointActor;
 	
 public:	
 	// Called every frame
