@@ -1,5 +1,6 @@
 #pragma once
 #include "opencv2/core/core.hpp"
+// #include <iostream>
 #include <math.h>
 #include <fstream>
 
@@ -24,7 +25,7 @@ Point2f point_proj_line(const Point2f &p, const float k, const float b) {
 }
 void get_bounding_xy(vector<Point2f> &r, const float cx, const int boundIdxStart, const float& k, const float& b, float* boundValue, int* boundIdx) {
 	for (int i = 0; i < 4; i++) {
-		// comapre project y 
+		// comapre project y
 		float projY = point_proj_line(r[i], k, b).y;
 		if (projY > boundValue[3]) {
 			boundValue[3] = projY;
@@ -68,9 +69,9 @@ void write_out_file(vector<vector<Point2f>> rects) {
 	outfile.close();
 }
 // input:  4 vertices, center, size, angle, label, zheight
-vector<float> getUpdateInformationFromRotatedBox(const vector<Point2f>& rect) {
+vector<float> getUpdateInformationFromRotatedBox(const vector<Point2f>& rect){
 	//position(3), float rot, float obj_width, float obj_height
-	vector<float> res(14, 0);
+	vector<float> res(14,0);
 	for (int i = 0; i < 4; i++) {
 		res[2 * i] = rect[i].x;
 		res[2 * i + 1] = rect[i].y;
@@ -80,7 +81,7 @@ vector<float> getUpdateInformationFromRotatedBox(const vector<Point2f>& rect) {
 
 	float dx01 = rect[0].x - rect[1].x; float dy01 = rect[0].y - rect[1].y;
 	float dx12 = rect[1].x - rect[2].x; float dy12 = rect[1].y - rect[2].y;
-	float dist1 = sqrt(pow(dx01, 2) + pow(dy01, 2));
+	float dist1 = sqrt(pow(dx01,2) + pow(dy01,2));
 	float dist2 = sqrt(pow(dx12, 2) + pow(dy12, 2));
 	if (dist1 > dist2) {
 		res[10] = dist1;
@@ -99,7 +100,7 @@ vector<vector<Point2f>> createRectFromParameters(vector<Point2f> rect1, vector<f
 	vector<Point2f> rect2;
 	vector<vector<Point2f>> res;
 	for (int i = 0; i < 4; i++)
-		rect2.push_back(Point2f(parameter[2 * i], parameter[2 * i + 1]));
+		rect2.push_back(Point2f(parameter[2*i], parameter[2*i+1]));
 	res.push_back(rect1);
 	res.push_back(rect2);
 	return res;

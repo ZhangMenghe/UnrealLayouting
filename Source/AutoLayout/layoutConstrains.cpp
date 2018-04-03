@@ -59,15 +59,10 @@ float layoutConstrains::t(float d, float m, float M, int a) {
 		return 1.0f;
 }
 
-//Clearance : 
+//Clearance :
 // Mcv(I) that minimize the overlap between furniture(with space)
 // the minimal the better
 void layoutConstrains::cal_clearance_violation(float& mcv) {
-	/*for (int i = 0; i < room->objctNum; i++) {		
-		for (int j = i + 1; j < room->objctNum; j++) {
-			mcv += room->cal_overlapping_area(room->objects[i].boundingBox, room->objects[j].boundingBox);
-		}
-	}*/
 	float overlappingFurArea= cv::sum(room->furnitureMask)[0] - room->obstacleArea;
 	mcv = room->indepenFurArea - overlappingFurArea;
 	if (mcv < 0)
@@ -114,7 +109,7 @@ void layoutConstrains::cal_pairwise_relationship(float& mpd, float& mpa) {
 				Vec3f g(-sin(room->objects[j].zrotation), cos(room->objects[j].zrotation), 0.0);
 				float cosfg = f.dot(g);
 				mpa -= 8 * cosfg*cosfg*cosfg*cosfg - 8 * cosfg*cosfg + 1;
-			}			
+			}
 		}
 	}
 }
@@ -136,7 +131,7 @@ void layoutConstrains::cal_conversation_term(float& mcd, float& mca) {
 			if (tobj->catalogId == TYPE_CHAIR) {
 				for (vector<int>::iterator ity = itx + 1; ity != itemIdx.end(); ++ity) {
 					singleObj * tmp = &room->objects[*ity];
-					
+
 					if (tmp->catalogId == TYPE_CHAIR) {
 						mcd += t(dist_between_Vectors(tobj->translation, tmp->translation), CONVERSATION_M_MIN, CONVERSATION_M_MAX);
 						//compute phi_fg and phi_gf
@@ -155,6 +150,7 @@ void layoutConstrains::cal_conversation_term(float& mcd, float& mca) {
 //balance:
 //place the mean of the distribution of visual weight at the center of the composition
 void layoutConstrains::cal_balance_term(float &mvb) {
+	float sumArea = .0f;
 	Vec3f centroid(.0f, .0f, .0f);
 	for (int i = 0; i < room->objctNum; i++)
 		centroid += room->objects[i].area * room->objects[i].translation;
@@ -182,7 +178,7 @@ void layoutConstrains::cal_alignment_term(float& mfa, float&mwa) {
 			float wallDist = room->get_nearest_wall_dist(tobj);
 			if(wallDist > 0)
 				mwa -= cos(4 * (tobj->zrotation - room->walls[tobj->nearestWall].zrotation - CV_PI /2));
-		}	
+		}
 	}
 }
 
@@ -219,7 +215,7 @@ void layoutConstrains::get_all_reflection(map<int, Vec3f> focalPoint_map, vector
 				reflectZrot.push_back(CV_PI - tobj->zrotation - 2 * atan2f(objPos[1] - y, objPos[0] - x));
 				idx++;
 			}
-				
+
 		}
 	}
 }
@@ -254,6 +250,8 @@ void layoutConstrains::cal_emphasis_term(float& mef, float& msy, float gamma) {
 			msy -= maxS;
 		}
 	}
+	if (msy == INFINITY)
+		msy = 0;
 }
 
 vector<float> layoutConstrains::get_all_constrain_terms() {
@@ -265,18 +263,18 @@ vector<float> layoutConstrains::get_all_constrain_terms() {
 	cal_circulation_term(mci);
 	mci /= 10000;
 	cal_pairwise_relationship(mpd, mpa);
-	//mpd /= 10;
+	mpd /= 10;
 	mpa = abs(mpa)*10;
 	cal_conversation_term(mcd, mca);
 	mcd *= 1000;
 	mca = abs(mca)/100;
-	
+
 	cal_balance_term(mvb);
 	if(room->wallNum!=0)
 		cal_alignment_term(mfa, mwa);
-	
-	mfa *= 3;
-	mwa *= 3;
+
+	mfa *= 30;
+	mwa *= 30;
 	mfa = abs(mfa);
 	mwa = abs(mwa);
 
@@ -284,9 +282,9 @@ vector<float> layoutConstrains::get_all_constrain_terms() {
 	// msy measure the symmetry term
 	if(!room->focalPoint_map.empty())
 		cal_emphasis_term(mef, msy);
-	
+
 	mef = abs(mef) * 10;
-	msy /= 20;
+	//msy /= 20;
 
 	float parameters[] = { mcv, mci, mpd, mpa, mcd, mca, mvb, mfa, mwa, mef, msy };
 	// display parameter weights

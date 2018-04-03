@@ -2,19 +2,17 @@
 
 #include "autoLayoutGenerator.h"
 #include "processFixedObjects.h"
-
+#include "Engine.h"
 // Sets default values
 AautoLayoutGenerator::AautoLayoutGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
-	inputObjFileName = new char[100];
-	int r = strcpy_s(inputObjFileName, 100, DEFAULT_INPUT_PARAMETER_FILE);
-
-	roomSize = DEFAULT_ROOM_SIZE;
-	room = new Room(roomSize.width, roomSize.height);
-
+	
+	FString dir = FPaths::GameDir() + FString("InputData/intermediate/layoutParam.txt");
+	inputObjFileName = string(TCHAR_TO_UTF8(*dir));
+	outputFileName = string(TCHAR_TO_UTF8(*(FPaths::GameDir() + FString("InputData/intermediate/recommendation.txt"))));
+	room = new Room();
 }
 
 // Called when the game starts or when spawned
@@ -25,15 +23,8 @@ void AautoLayoutGenerator::BeginPlay()
 	if (room != nullptr && (room->objctNum != 0 || room->wallNum != 0)) {
 		automatedLayout* layout = new automatedLayout(room, weights);
 		layout->generate_suggestions();
-		layout->display_suggestions();
+		layout->display_suggestions(outputFileName);
 	}
-}
-
-// Called every frame
-void AautoLayoutGenerator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void AautoLayoutGenerator::parser_inputfile() {
@@ -63,28 +54,29 @@ void AautoLayoutGenerator::parser_inputfile() {
 	int itemNum = cateType.size();
 	vector<vector<float>> fixedObjParams;
 	vector<vector<float>> mergedObjParams;
-	int groupid;
 	vector<int> groupedIds;
-	for (int i = 0; i < itemNum; i++) {
+	int startId = 0;
+	if (cateType[0] == 'r') {
+		room->initialize_room(parameters[0][0], parameters[0][1]);
+		startId = 1;
+	}
+	else
+		room->initialize_room();;
+	for (int i = startId; i < itemNum; i++) {
 		switch (cateType[i])
 		{
-			//comments
 		case '#':
 			break;
 			//add a new wall
 		case 'w':
-			room->add_a_wall(Vec3f(parameters[i][0], parameters[i][1], parameters[i][2]), parameters[i][3], parameters[i][4], parameters[i][5]);
+			room->add_a_wall(parameters[i]);
 			break;
-			//furniture
 		case 'f':
-			room->add_an_object(parameters[i], 0);
+			room->add_an_object(parameters[i]);
 			break;
-			//focal point
 		case 'p':
-			groupid = parameters[i].size() == 3 ? 0 : parameters[i][3];
-			room->add_a_focal_point(Vec3f(parameters[i][0], parameters[i][1], parameters[i][2]), groupid);
+			room->add_a_focal_point(parameters[i]);
 			break;
-			// fixed objects
 		case 'o':
 			fixedObjParams.push_back(parameters[i]);
 			break;
@@ -94,8 +86,7 @@ void AautoLayoutGenerator::parser_inputfile() {
 				groupedIds.push_back(parameters[i][k]);
 			break;
 		case 'v':
-			for (int n = 0; n < parameters[i].size(); n++)
-				weights.push_back(parameters[i][n]);
+			weights = parameters[i];
 			break;
 		default:
 			break;
@@ -111,10 +102,10 @@ void AautoLayoutGenerator::parser_inputfile() {
 		sort(groupedIds.begin(), groupedIds.end());
 		for (int compareIdx = fixedObjParams.size() - 1, gidx = groupedIds.size() - 1; compareIdx > -1; ) {
 			if (gidx < 0) {
-							for(; compareIdx > -1;compareIdx--)
-								room->add_an_object(fixedObjParams[compareIdx]);
-							break;
-						}
+				for(; compareIdx > -1;compareIdx--)
+					room->add_an_object(fixedObjParams[compareIdx]);
+				break;
+			}
 			if (compareIdx > groupedIds[gidx]) {
 				//vector<Point2f> rect1;
 				//for (int i = 0; i < 4; i++)

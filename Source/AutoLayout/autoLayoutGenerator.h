@@ -6,8 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "autoLayoutGenerator.generated.h"
 
-#define DEFAULT_INPUT_PARAMETER_FILE "E:/layoutParam.txt"
-#define DEFAULT_ROOM_SIZE Size2f(800.f, 600.f)
+//#define DEFAULT_INPUT_PARAMETER_FILE "E:/layoutParam.txt"
+//#define DEFAULT_ROOM_SIZE Size2f(800.f, 600.f)
 
 UCLASS()
 class AUTOLAYOUT_API AautoLayoutGenerator : public AActor
@@ -18,7 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AautoLayoutGenerator();
 
-	char* inputObjFileName;
+	string inputObjFileName;
+	string outputFileName;
 	Room * room;
 	vector<float> weights;
 	Size2f roomSize;
@@ -26,8 +27,4 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 };

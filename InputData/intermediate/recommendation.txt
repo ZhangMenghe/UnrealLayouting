@@ -1,0 +1,30 @@
+RoomSize: 400 300
+WALL_Id	|	zheight	|	vertices	|	zrotation
+0	|	10.000000	|	[-200, -150]	|	[200, -150]	|	90
+1	|	10.000000	|	[-200, -150]	|	[-200, 150]	|	0
+2	|	10.000000	|	[-200, 150]	|	[0, 150]	|	90
+3	|	10.000000	|	[0, 150]	|	[200, 0]	|	-36.8699
+4	|	10.000000	|	[200, 0]	|	[200, -150]	|	0
+FURNITURE_Id	|	Category	|	Height	|	ObjWidth	|	ObjHeight
+0	|	0	|	10	|	50	|	50
+Recommendation3	|	[0, 0, 0]	|	0
+Recommendation2	|	[0, 0, 0]	|	0
+Recommendation1	|	[0, 0, 0]	|	0
+FURNITURE_Id	|	Category	|	Height	|	ObjWidth	|	ObjHeight
+1	|	0	|	10	|	50	|	50
+Recommendation3	|	[0, 0, 0]	|	0
+Recommendation2	|	[0, 0, 0]	|	0
+Recommendation1	|	[0, 0, 0]	|	0
+FURNITURE_Id	|	Category	|	Height	|	ObjWidth	|	ObjHeight
+2	|	4	|	10	|	100	|	50
+Recommendation3	|	[-174.99, 57, 0]	|	1.5708
+Recommendation2	|	[-174.99, 57, 0]	|	1.5708
+Recommendation1	|	[-174.99, 57, 0]	|	1.5708
+FURNITURE_Id	|	Category	|	Height	|	ObjWidth	|	ObjHeight
+3	|	100	|	10	|	150	|	50
+Recommendation3	|	[0, 0, 0]	|	0
+Recommendation2	|	[0, 0, 0]	|	0
+Recommendation1	|	[0, 0, 0]	|	0
+Obstacle	|	Vertices
+Point_Focal	|	Position
+0	|	[0, 150, 0]

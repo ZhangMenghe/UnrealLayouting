@@ -1,9 +1,8 @@
 #pragma once
-
+// #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
-
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "room.h"
@@ -19,7 +18,7 @@ private:
 	float t(float d, float m, float M, int a = 2);
 	void get_all_reflection(map<int, Vec3f> focalPoint_map, vector<Vec3f> &reflectTranslate, vector<float> & reflectZrot, float refk= INFINITY);
 	void get_pairwise_relation(const singleObj& obj1, const singleObj& obj2, int&pfg, float&m, float&M, int & wallRelId);
-	//Clearance : 
+	//Clearance :
 	//Mcv(I) that minimize the overlap between furniture(with space)
 	void cal_clearance_violation(float& mcv);
 	//Circulation:
@@ -53,5 +52,3 @@ public:
 	vector<float> get_all_constrain_terms();
 
 };
-
-
