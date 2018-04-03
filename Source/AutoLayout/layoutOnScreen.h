@@ -4,7 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-
+#include "Engine/StaticMeshActor.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "layoutOnScreen.generated.h"
@@ -30,7 +30,10 @@ private:
 	vector<UMaterialInterface*> materialToGetSet;
 	//vector<FLinearColor> labelColorSet;
 	int currentRecId;
+	AStaticMeshActor *floorObj;
 	void draw_single_stuff(int cate, vector<float>param, int objId);
+	void resize_room(string str, char*delims);
+	void parser_resfile();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,7 +42,6 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	void parser_resfile();
+	void InitiallayoutOnScreen();
 	void change_recommendation();
 };

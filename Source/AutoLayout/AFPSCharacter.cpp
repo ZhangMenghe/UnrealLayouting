@@ -57,7 +57,7 @@ void AAFPSCharacter::BeginPlay()
 		cameraPointActor->AttachToComponent(FPSCameraComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		cameraPointActor->SetActorHiddenInGame(true);
 	}*/
-	layoutScreen->parser_resfile();
+	layoutScreen->InitiallayoutOnScreen();
 	//AActor * tmpActor = GetWorld()->SpawnActor<AlayoutOnScreen>(layoutScreenBP, { .0f,.0f,.0f }, { .0f,.0f,.0f });
 }
 

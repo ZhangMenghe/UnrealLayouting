@@ -45,6 +45,7 @@ AlayoutOnScreen::AlayoutOnScreen()
 void AlayoutOnScreen::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 // Called every frame
@@ -75,7 +76,14 @@ void AlayoutOnScreen::debug_spawn() {
 		}
 	}
 }
-
+void AlayoutOnScreen::InitiallayoutOnScreen() {
+	for (TActorIterator<AStaticMeshActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		floorObj = *ActorItr;
+		break;
+	}
+	parser_resfile();
+}
 void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId = -1) {
 	float cx=0, cy=0, cz=0;
 	float sx = 10, sy = 10, sz = 30;
@@ -85,7 +93,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 	case 0:
 		cx = (param[2] + param[4]) / 2;
 		cy = (param[3] + param[5]) / 2;
-		rot = param[6];
+		rot = 90-param[6];
 		sx = dist_of_points(param[2], param[3], param[4], param[5]);
 		sz = 100;
 		break;
@@ -97,7 +105,7 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 	case 3:
 		cx = (param[0] + param[4]) / 2;
 		cy = (param[1] + param[5]) / 2;
-		rot = atanf((param[7] - param[3]) / (param[6] - param[2])) * 180 / 3.14;
+		rot = -atanf((param[7] - param[3]) / (param[6] - param[2])) * 180 / 3.14;
 		sx = dist_of_points(param[0], param[1], param[2], param[3]);
 		sy = dist_of_points(param[2], param[3], param[4], param[5]);
 		break;
@@ -106,7 +114,6 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 	}
 	sx /= 10; sy /= 10; sz /= 10;
 	cx *= 10; cy *= 10; cz = sz * 50;
-	rot = rot / PI * 180;
 
 	UWorld * const World = GetWorld();
 	if (World) {
@@ -121,6 +128,24 @@ void AlayoutOnScreen::draw_single_stuff(int cate, vector<float>param, int ObjId 
 			
 	}
 }
+void AlayoutOnScreen::resize_room(string str, char* delims) {
+	char * charline = new char[300];
+	int r = strcpy_s(charline, 300, str.c_str());
+
+	char* context = nullptr;
+	char * token = strtok_s(charline, delims, &context);
+	float width = atof(strtok_s(nullptr, delims, &context));
+	float height = atof(strtok_s(nullptr, delims, &context));
+	//crash here
+	floorObj->SetActorLocation(FVector(width*5, height*5, 0));
+	UWorld * const World = GetWorld();
+	if (World) {
+		UStaticMeshComponent * components = floorObj->GetStaticMeshComponent();
+		USceneComponent* sc = Cast<USceneComponent>(components);
+		if (sc)
+			sc->SetWorldScale3D(FVector(width/10 , height/10, 10));
+	}
+}
 void AlayoutOnScreen::parser_resfile() {
 	ifstream instream(filename);
 	string str;
@@ -129,7 +154,9 @@ void AlayoutOnScreen::parser_resfile() {
 	char* context = nullptr;
 	int state = -1;
 	vector<float> currentObj;
-	
+	string roomSizeStr;
+	getline(instream, roomSizeStr);
+	resize_room(roomSizeStr, delims);
 	while (instream && getline(instream, str)) {
 		if (!str.length())
 			continue;
